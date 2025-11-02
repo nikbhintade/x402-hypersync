@@ -30,13 +30,17 @@ app.use(
 );
 
 
-app.get("/token-transfers/:chainId/:address/:token", async (req: Request, res: Response) => {
+app.get([
+    "/token-transfers/:chainId/:address", 
+    "/token-transfers/:chainId/:address/:token"
+], async (req: Request, res: Response) => {
     const address = req.params.address?.toLowerCase();
     const chainId = req.params.chainId;
     if (!address || !chainId) {
         return res.status(400).json({ error: "Address and chainId parameters are required" });
     }
 
+    console.log("hit")
     // reusable Hypersync client
     const client = HypersyncClient.new({
         url: `https://${chainId}.hypersync.xyz`,
@@ -96,6 +100,7 @@ app.get("/token-transfers/:chainId/:address/:token", async (req: Request, res: R
             }
         }
 
+        console.log("hit 2")
         const result = await client.collect(query, {
             reverse: true
         });
@@ -107,6 +112,7 @@ app.get("/token-transfers/:chainId/:address/:token", async (req: Request, res: R
 
         const decoded = await decoder.decodeLogs(logs);
 
+        console.log("hit 3")
         // Combine decoded + raw log metadata
         const transfers = decoded.map((decodedLog, i) => {
             const rawLog = logs[i];
@@ -120,6 +126,7 @@ app.get("/token-transfers/:chainId/:address/:token", async (req: Request, res: R
             };
         });
 
+        console.log("hit 4")
         res.json({ address, transfers });
     } catch (err) {
         console.error("Error while fetching token transfers:", err);
